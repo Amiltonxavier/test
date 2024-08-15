@@ -1,45 +1,45 @@
-import { FormEvent, useState } from 'react'
+import { ChangeEvent, FormEvent, useState } from 'react'
 import './App.css'
 import axios from 'axios';
 
+export const api = axios.create({
+  baseURL: 'http://10.160.252.209:1084'
+});
+
 function App() {
-  const [data, setData] = useState('')
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    const formData = new FormData(e.currentTarget);
-    const newData = {
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
-    };
-    login(newData.email, newData.password)
+  const [data, setData] = useState(null);
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  function handlePassword (e: ChangeEvent<HTMLInputElement>){
+    setPassword(e.target.value)
   }
 
-  const login = async (email: string, password: string) => {
-    try{
-      const response = await axios.post("http://10.160.252.209:1084/login", { email, password })
-      console.log(response.data)
-      setData(response.data)
-    }catch(error) {
+  function handleEmail (e: ChangeEvent<HTMLInputElement>){
+    setEmail(e.target.value)
+  }
+
+  async function handleSubmitS (e: FormEvent<HTMLElement>){
+    e.preventDefault()
+    console.log(email, password)
+    try {
+      const response = await api.post("/login", { email, password });
+      setData(response.data);
+    } catch (error) {
       console.log(error)
     }
-
-
-      
-    }
+  }
 
   return (
-    <>
-      <form onSubmit={handleSubmit} action="">
-        <input type="email" name="email" id="" />
-        <input type="text" name="password" id="password" />
-        <button type="submit">Enviar</button>
+    <form onSubmit={handleSubmitS}>
+      <input type="email" name="email" id="email" onChange={handleEmail} required />
+      <input type="password" name="password" id="password" onChange={handlePassword} required />
+      <button type="submit">Enviar</button>
 
-        {
-          JSON.stringify(data)
-        }
-      </form>
-    </>
-  )
+      {data && <div>Response: {JSON.stringify(data)}</div>}
+    </form>
+  );
 }
 
-export default App
+export default App;
